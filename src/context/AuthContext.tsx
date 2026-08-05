@@ -67,6 +67,13 @@ function AuthInnerProvider({ children }: { children: React.ReactNode }) {
     }
   }, [session]);
 
+  // Auto open login modal if redirected by NextAuth Server Middleware
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.location.search.includes('loginRequired=true')) {
+      setShowLoginModal(true);
+    }
+  }, []);
+
   const loginMember = async (identifier: string, pass: string, membersList?: MemberData[]) => {
     if (!identifier.trim() || !pass.trim()) {
       return { success: false, message: 'Harap isi NRA/Email dan Password!' };
