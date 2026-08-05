@@ -1,0 +1,207 @@
+// Prisma Schema for NTCI (Nmax Turbo Club Indonesia) CMS
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("POSTGRES_PRISMA_URL")
+}
+
+enum Role {
+  SUPER_ADMIN
+  CHAPTER_ADMIN
+  MEMBER
+}
+
+enum ChapterStatus {
+  DECLARED
+  EMBRYO
+}
+
+enum EventCategory {
+  KOPDAR
+  TOURING
+  SOCIAL_CSR
+  ANNIVERSARY
+  WORKSHOP
+}
+
+enum RsvpStatus {
+  ATTENDING
+  MAYBE
+  DECLINED
+}
+
+enum ArticleCategory {
+  NEWS
+  TOURING_REPORT
+  SAFETY_RIDING
+  TECH_TIPS
+}
+
+enum DocumentCategory {
+  AD_ART
+  REGULATION
+  SOP
+  FORM
+}
+
+model User {
+  id           String      @id @default(uuid())
+  email        String      @unique
+  password     String
+  fullName     String
+  nra          String?     @unique
+  phone        String
+  domicile     String?
+  role         Role        @default(MEMBER)
+  isVerified   Boolean     @default(false)
+  points       Int         @default(100)
+  badges       String?
+  
+  ktpNumber    String?
+  simNumber    String?
+  stnkNumber   String?
+  motorYear    String?
+  motorPlate   String?
+  motorColor   String?
+  motorMods    String?
+  avatarUrl    String?
+  qrCode       String?
+
+  chapterId    String?
+  chapter      Chapter?    @relation(fields: [chapterId], references: [id], onDelete: SetNull)
+
+  createdEvents   Event[]       @relation("EventAuthor")
+  eventRsvps      EventRsvp[]
+  createdArticles Article[]     @relation("ArticleAuthor")
+
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+}
+
+model Chapter {
+  id             String    @id @default(uuid())
+  name           String    @unique
+  slug           String    @unique
+  region         String
+  city           String
+  leaderName     String
+  contactPhone   String
+  kopdarLocation String
+  kopdarSchedule String
+  status         ChapterStatus @default(DECLARED)
+  logoUrl        String?
+
+  members        User[]
+  events         Event[]
+  emergencyContacts EmergencyContact[]
+
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model Event {
+  id           String        @id @default(uuid())
+  title        String
+  slug         String        @unique
+  description  String
+  category     EventCategory @default(KOPDAR)
+  location     String
+  meetingPoint String?
+  startDate    DateTime
+  endDate      DateTime?
+  bannerUrl    String?
+  isPublished  Boolean       @default(true)
+
+  chapterId    String?
+  chapter      Chapter?      @relation(fields: [chapterId], references: [id], onDelete: SetNull)
+  authorId     String
+  author       User          @relation("EventAuthor", fields: [authorId], references: [id])
+
+  rsvps        EventRsvp[]
+
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model EventRsvp {
+  id        String     @id @default(uuid())
+  eventId   String
+  event     Event      @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status    RsvpStatus @default(ATTENDING)
+
+  createdAt DateTime   @default(now())
+
+  @@unique([eventId, userId])
+}
+
+model Article {
+  id          String          @id @default(uuid())
+  title       String
+  slug        String          @unique
+  excerpt     String
+  content     String
+  coverImage  String?
+  category    ArticleCategory @default(NEWS)
+  isPublished Boolean         @default(true)
+
+  authorId    String
+  author      User            @relation("ArticleAuthor", fields: [authorId], references: [id])
+
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+}
+
+model Document {
+  id          String           @id @default(uuid())
+  title       String
+  category    DocumentCategory @default(AD_ART)
+  description String?
+  fileUrl     String
+  isPublic    Boolean          @default(true)
+
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+}
+
+model Merchandise {
+  id          String   @id @default(uuid())
+  name        String
+  category    String   @default("Apparel")
+  description String
+  price       Int
+  imageUrl    String
+  buyUrl      String?
+  isAvailable Boolean  @default(true)
+
+  createdAt   DateTime @default(now())
+}
+
+model Sponsor {
+  id             String   @id @default(uuid())
+  name           String
+  logoUrl        String
+  discountDetail String
+  websiteUrl     String?
+  category       String
+  isActive       Boolean  @default(true)
+
+  createdAt      DateTime @default(now())
+}
+
+model EmergencyContact {
+  id             String   @id @default(uuid())
+  name           String
+  phone          String
+  roleOrLocation String
+  
+  chapterId      String?
+  chapter        Chapter? @relation(fields: [chapterId], references: [id], onDelete: SetNull)
+
+  createdAt      DateTime @default(now())
+}
