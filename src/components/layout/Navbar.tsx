@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { ChevronDown, Menu, X, UserCheck, Lock } from 'lucide-react';
 
@@ -75,12 +76,15 @@ export default function Navbar() {
           <div className="flex items-center justify-between gap-4">
             {/* Logo & Brand */}
             <Link href="/" className="flex items-center space-x-3 group shrink-0">
-              <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-[#F0C05A] via-[#D4AF37] to-[#8C6B1C] p-0.5 shadow-xl group-hover:scale-105 transition-transform duration-300 shrink-0">
-                <div className="w-full h-full bg-[#171210] rounded-[10px] flex items-center justify-center">
-                  <span className="font-black text-transparent bg-clip-text bg-gradient-to-r from-[#F0C05A] via-[#D4AF37] to-[#E2E8F0] text-lg tracking-tighter">
-                    NTCI
-                  </span>
-                </div>
+              <div className="relative w-10 h-10 sm:w-11 sm:h-11 group-hover:scale-105 transition-transform duration-300 shrink-0 filter drop-shadow-[0_0_10px_rgba(212,175,55,0.4)]">
+                <Image
+                  src="/logo.png"
+                  alt="Logo Resmi NTCI Indonesia"
+                  width={44}
+                  height={44}
+                  className="object-contain w-full h-full"
+                  priority
+                />
               </div>
               <div className="flex flex-col">
                 <div className="flex items-center space-x-1.5 whitespace-nowrap">
@@ -203,8 +207,14 @@ export default function Navbar() {
             {/* Drawer Header */}
             <div className="flex items-center justify-between pb-4 border-b border-[#332722]">
               <div className="flex items-center space-x-2.5">
-                <div className="w-9 h-9 rounded-xl bg-[#D4AF37]/20 border border-[#D4AF37]/50 flex items-center justify-center font-black text-[#E5C158] text-xs">
-                  NTCI
+                <div className="relative w-9 h-9 shrink-0 filter drop-shadow-[0_0_8px_rgba(212,175,55,0.5)]">
+                  <Image
+                    src="/logo.png"
+                    alt="Logo Resmi NTCI Indonesia"
+                    width={36}
+                    height={36}
+                    className="object-contain w-full h-full"
+                  />
                 </div>
                 <div>
                   <h4 className="font-extrabold text-white text-sm">NTCI INDONESIA</h4>

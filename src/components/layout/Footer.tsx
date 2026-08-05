@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Shield, PhoneCall, Mail, MapPin, AlertTriangle, Globe, Share2, MessageCircle } from 'lucide-react';
 
 export default function Footer() {
@@ -12,12 +13,14 @@ export default function Footer() {
           {/* Col 1: Brand Info */}
           <div className="lg:col-span-2 space-y-4">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#F0C05A] via-[#D4AF37] to-[#8C6B1C] p-0.5 shadow-lg">
-                <div className="w-full h-full bg-[#171210] rounded-[10px] flex items-center justify-center">
-                  <span className="font-black text-transparent bg-clip-text bg-gradient-to-r from-[#F0C05A] to-[#D4AF37] text-lg">
-                    NTCI
-                  </span>
-                </div>
+              <div className="relative w-11 h-11 shrink-0 filter drop-shadow-[0_0_10px_rgba(212,175,55,0.4)]">
+                <Image
+                  src="/logo.png"
+                  alt="Logo Resmi NTCI Indonesia"
+                  width={44}
+                  height={44}
+                  className="object-contain w-full h-full"
+                />
               </div>
               <div className="flex flex-col">
                 <span className="font-black text-white text-lg tracking-wider">
