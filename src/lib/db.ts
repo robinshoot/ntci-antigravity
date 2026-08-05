@@ -1,6 +1,8 @@
 import { prisma } from './prisma';
 import {
+  INITIAL_CHAPTERS,
   ChapterData,
+  ChapterOfficer,
   MemberData,
   EventData,
   ArticleData,
@@ -21,20 +23,41 @@ export async function getChapters(): Promise<ChapterData[]> {
     orderBy: { name: 'asc' },
   });
 
-  return chapters.map((c) => ({
-    id: c.id,
-    name: c.name,
-    slug: c.slug,
-    region: c.region,
-    city: c.city,
-    leaderName: c.leaderName,
-    contactPhone: c.contactPhone,
-    kopdarLocation: c.kopdarLocation,
-    kopdarSchedule: c.kopdarSchedule,
-    status: (c.status as 'DECLARED' | 'EMBRYO' | 'INACTIVE') || 'DECLARED',
-    memberCount: c._count.members,
-    logoUrl: c.logoUrl || undefined,
-  }));
+  if (!chapters || chapters.length === 0) {
+    return INITIAL_CHAPTERS;
+  }
+
+  return chapters.map((c) => {
+    const mockCh = INITIAL_CHAPTERS.find(
+      (m) => m.slug.toLowerCase() === c.slug.toLowerCase() || m.id === c.id || m.name.toLowerCase() === c.name.toLowerCase()
+    );
+
+    const fallbackOfficers: ChapterOfficer[] = [
+      {
+        role: 'Ketua Chapter',
+        name: c.leaderName,
+        nra: `NTCI-${c.slug.toUpperCase().slice(0, 3)}-001`,
+        phone: c.contactPhone,
+        avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80',
+      },
+    ];
+
+    return {
+      id: c.id,
+      name: c.name,
+      slug: c.slug,
+      region: c.region,
+      city: c.city,
+      leaderName: c.leaderName,
+      contactPhone: c.contactPhone,
+      kopdarLocation: c.kopdarLocation,
+      kopdarSchedule: c.kopdarSchedule,
+      status: (c.status as 'DECLARED' | 'EMBRYO' | 'INACTIVE') || 'DECLARED',
+      memberCount: c._count.members,
+      logoUrl: c.logoUrl || undefined,
+      officers: mockCh?.officers || fallbackOfficers,
+    };
+  });
 }
 
 export async function getChapterBySlug(slug: string): Promise<ChapterData | undefined> {
@@ -52,7 +75,21 @@ export async function getChapterBySlug(slug: string): Promise<ChapterData | unde
     },
   });
 
-  if (!c) return undefined;
+  const mockCh = INITIAL_CHAPTERS.find(
+    (m) => m.slug.toLowerCase() === slug.toLowerCase() || m.id === slug
+  );
+
+  if (!c) return mockCh;
+
+  const fallbackOfficers: ChapterOfficer[] = [
+    {
+      role: 'Ketua Chapter',
+      name: c.leaderName,
+      nra: `NTCI-${c.slug.toUpperCase().slice(0, 3)}-001`,
+      phone: c.contactPhone,
+      avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80',
+    },
+  ];
 
   return {
     id: c.id,
@@ -67,6 +104,7 @@ export async function getChapterBySlug(slug: string): Promise<ChapterData | unde
     status: (c.status as 'DECLARED' | 'EMBRYO' | 'INACTIVE') || 'DECLARED',
     memberCount: c._count.members,
     logoUrl: c.logoUrl || undefined,
+    officers: mockCh?.officers || fallbackOfficers,
   };
 }
 
