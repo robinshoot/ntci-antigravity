@@ -2,15 +2,17 @@
 
 import React, { useState } from 'react';
 import { EventData } from '@/lib/mockData';
-import { Calendar, MapPin, Users, CheckCircle2, Flag, ArrowRight } from 'lucide-react';
+import { Calendar, MapPin, Users, CheckCircle2, Flag, ArrowRight, Lock } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useAuth } from '@/context/AuthContext';
 
 interface EventCalendarProps {
   events: EventData[];
 }
 
 export default function EventCalendar({ events }: EventCalendarProps) {
+  const { isMemberLoggedIn, setShowLoginModal } = useAuth();
   const [activeCategory, setActiveCategory] = useState<string>('ALL');
   const [rsvpedEvents, setRsvpedEvents] = useState<Record<string, boolean>>({});
 
@@ -141,15 +143,30 @@ export default function EventCalendar({ events }: EventCalendarProps) {
                     )}
 
                     <button
-                      onClick={() => handleRsvp(ev.id)}
-                      className={`w-full py-2.5 rounded-xl text-xs font-extrabold transition-all shadow-md flex items-center justify-center space-x-2 ${
+                      onClick={() => {
+                        if (!isMemberLoggedIn) {
+                          setShowLoginModal(true);
+                          return;
+                        }
+                        handleRsvp(ev.id);
+                      }}
+                      className={`w-full py-2.5 rounded-xl text-xs font-extrabold transition-all shadow-md flex items-center justify-center space-x-2 cursor-pointer ${
                         isAttending
                           ? 'bg-emerald-500 text-black'
                           : 'bg-gradient-to-r from-[#F0C05A] via-[#D4AF37] to-[#C5A059] text-[#171210] hover:opacity-90'
                       }`}
                     >
-                      <CheckCircle2 className="w-4 h-4" />
-                      <span>{isAttending ? '✓ Kamu Terdaftar Hadir' : 'Konfirmasi Hadir (RSVP)'}</span>
+                      {isMemberLoggedIn ? (
+                        <>
+                          <CheckCircle2 className="w-4 h-4" />
+                          <span>{isAttending ? '✓ Kamu Terdaftar Hadir' : 'Konfirmasi Hadir (RSVP)'}</span>
+                        </>
+                      ) : (
+                        <>
+                          <Lock className="w-4 h-4 text-[#171210]" />
+                          <span>Login untuk Konfirmasi Hadir (RSVP)</span>
+                        </>
+                      )}
                     </button>
                   </div>
                 </div>

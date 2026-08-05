@@ -2,14 +2,16 @@
 
 import React, { useState } from 'react';
 import { MerchandiseData } from '@/lib/mockData';
-import { ShoppingBag, QrCode, CheckCircle, X, Sparkles } from 'lucide-react';
+import { ShoppingBag, QrCode, CheckCircle, X, Sparkles, Lock } from 'lucide-react';
 import Image from 'next/image';
+import { useAuth } from '@/context/AuthContext';
 
 interface MerchSectionProps {
   items: MerchandiseData[];
 }
 
 export default function MerchSection({ items }: MerchSectionProps) {
+  const { isMemberLoggedIn, setShowLoginModal } = useAuth();
   const [selectedMerch, setSelectedMerch] = useState<MerchandiseData | null>(null);
   const [selectedSize, setSelectedSize] = useState('L');
   const [paymentSuccess, setPaymentSuccess] = useState(false);
@@ -71,27 +73,40 @@ export default function MerchSection({ items }: MerchSectionProps) {
                 </div>
               </div>
 
-              <div className="pt-3 border-t border-[#332722] flex gap-2">
-                <button
-                  onClick={() => {
-                    setSelectedMerch(item);
-                    setPaymentSuccess(false);
-                  }}
-                  className="flex-1 inline-flex items-center justify-center space-x-1.5 py-2.5 rounded-xl text-xs font-bold text-[#171210] bg-gradient-to-r from-[#F0C05A] via-[#D4AF37] to-[#C5A059] hover:opacity-90 transition-all shadow-md"
-                >
-                  <QrCode className="w-4 h-4" />
-                  <span>Bayar QRIS</span>
-                </button>
-                <a
-                  href={item.buyUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-4 py-2.5 rounded-xl text-xs font-bold text-white bg-[#241D1A] hover:bg-[#332722] border border-[#332722] inline-flex items-center justify-center"
-                  title="Pesan via WhatsApp"
-                >
-                  <ShoppingBag className="w-4 h-4" />
-                </a>
-              </div>
+              {isMemberLoggedIn ? (
+                <div className="pt-3 border-t border-[#332722] flex gap-2">
+                  <button
+                    onClick={() => {
+                      setSelectedMerch(item);
+                      setPaymentSuccess(false);
+                    }}
+                    className="flex-1 inline-flex items-center justify-center space-x-1.5 py-2.5 rounded-xl text-xs font-bold text-[#171210] bg-gradient-to-r from-[#F0C05A] via-[#D4AF37] to-[#C5A059] hover:opacity-90 transition-all shadow-md cursor-pointer"
+                  >
+                    <QrCode className="w-4 h-4" />
+                    <span>Bayar QRIS</span>
+                  </button>
+                  <a
+                    href={item.buyUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-4 py-2.5 rounded-xl text-xs font-bold text-white bg-[#241D1A] hover:bg-[#332722] border border-[#332722] inline-flex items-center justify-center"
+                    title="Pesan via WhatsApp"
+                  >
+                    <ShoppingBag className="w-4 h-4" />
+                  </a>
+                </div>
+              ) : (
+                <div className="pt-3 border-t border-[#332722]">
+                  <button
+                    type="button"
+                    onClick={() => setShowLoginModal(true)}
+                    className="w-full inline-flex items-center justify-center space-x-2 py-2.5 rounded-xl text-xs font-bold text-[#E5C158] bg-[#D4AF37]/10 border border-[#D4AF37]/30 hover:bg-[#D4AF37]/20 transition-all cursor-pointer"
+                  >
+                    <Lock className="w-4 h-4 text-[#E5C158]" />
+                    <span>Login untuk Beli Merchandise</span>
+                  </button>
+                </div>
+              )}
             </div>
           ))}
         </div>
