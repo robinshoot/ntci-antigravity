@@ -50,11 +50,19 @@ export default function Navbar() {
   }
 
   // Public Links (Umum / Belum Login)
-  const publicNavLinks: NavItem[] = [
+  const publicPrimaryLinks: NavItem[] = [
     { name: 'Beranda', href: '/' },
     { name: 'Visi & Misi', href: '/visi-misi' },
     { name: 'Struktur', fullName: 'Struktur Organisasi', href: '/struktur' },
     { name: 'Chapter', href: '/chapter' },
+    { name: 'Anggota', href: '/anggota' },
+  ];
+
+  const publicSecondaryLinks: NavItem[] = [
+    { name: 'Kalender Kegiatan', href: '/kalender' },
+    { name: 'Warta & Tips', href: '/warta' },
+    { name: 'Merchandise', href: '/merchandise' },
+    { name: 'Sponsor & Perks', href: '/sponsor' },
   ];
 
   // Full Links for Logged-In Verified Members
@@ -64,10 +72,10 @@ export default function Navbar() {
     { name: 'Struktur', fullName: 'Struktur Organisasi', href: '/struktur' },
     { name: 'Chapter', href: '/chapter' },
     { name: 'Anggota', href: '/anggota' },
-    { name: 'AD-ART', href: '/ad-art' },
   ];
 
   const memberSecondaryLinks: NavItem[] = [
+    { name: 'AD-ART', href: '/ad-art' },
     { name: 'Kalender Kegiatan', href: '/kalender' },
     { name: 'Warta & Tips', href: '/warta' },
     { name: 'Merchandise', href: '/merchandise' },
@@ -75,9 +83,11 @@ export default function Navbar() {
     { name: 'SOS Darurat', href: '/sos', highlight: true },
   ];
 
-  const activePrimaryLinks = isMemberLoggedIn ? memberPrimaryLinks : publicNavLinks;
-  const activeSecondaryLinks = isMemberLoggedIn ? memberSecondaryLinks : [];
-  const allNavLinks = isMemberLoggedIn ? [...memberPrimaryLinks, ...memberSecondaryLinks] : publicNavLinks;
+  const activePrimaryLinks = isMemberLoggedIn ? memberPrimaryLinks : publicPrimaryLinks;
+  const activeSecondaryLinks = isMemberLoggedIn ? memberSecondaryLinks : publicSecondaryLinks;
+  const allNavLinks = isMemberLoggedIn
+    ? [...memberPrimaryLinks, ...memberSecondaryLinks]
+    : [...publicPrimaryLinks, ...publicSecondaryLinks];
 
   const isSecondaryActive = memberSecondaryLinks.some(
     (link) => pathname === link.href
@@ -144,10 +154,9 @@ export default function Navbar() {
                 );
               })}
 
-              {/* Dropdown More (Lainnya) - Only when Member Logged In */}
-              {isMemberLoggedIn && (
-                <div className="relative group" onMouseLeave={() => setDropdownOpen(false)}>
-                  <button
+              {/* Dropdown More (Lainnya) */}
+              <div className="relative group" onMouseLeave={() => setDropdownOpen(false)}>
+                <button
                     type="button"
                     onClick={() => setDropdownOpen(!dropdownOpen)}
                     className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all flex items-center space-x-1 ${
@@ -188,7 +197,6 @@ export default function Navbar() {
                     </div>
                   </div>
                 </div>
-              )}
             </nav>
 
             {/* Action CTAs & Auth Controls */}
