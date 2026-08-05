@@ -93,10 +93,10 @@ export default function Navbar() {
     (link) => pathname === link.href
   );
 
-  const handleMemberLoginSubmit = (e: React.FormEvent) => {
+  const handleMemberLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoginError('');
-    const result = loginMember(loginIdentifier, loginPassword);
+    const result = await loginMember(loginIdentifier, loginPassword);
     if (!result.success) {
       setLoginError(result.message);
     }
