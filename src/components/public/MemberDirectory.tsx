@@ -19,47 +19,6 @@ export default function MemberDirectory({ members }: MemberDirectoryProps) {
   const [viewMode, setViewMode] = useState<'GROUPED' | 'GRID'>('GROUPED');
   const [selectedEktaMember, setSelectedEktaMember] = useState<MemberData | null>(null);
 
-  // If user is not logged in as a verified member, block directory view
-  if (!isMemberLoggedIn) {
-    return (
-      <div className="pt-28 pb-20 bg-[#080B10] min-h-screen text-slate-200 flex flex-col items-center justify-center p-4">
-        <div className="max-w-md w-full bg-[#131924] border-2 border-[#D4AF37]/40 rounded-3xl p-8 text-center space-y-6 shadow-2xl relative overflow-hidden">
-          <div className="w-16 h-16 rounded-2xl bg-[#D4AF37]/20 border border-[#D4AF37]/50 flex items-center justify-center mx-auto text-[#E5C158] shadow-xl">
-            <Lock className="w-8 h-8" />
-          </div>
-
-          <div className="space-y-2">
-            <span className="text-[10px] font-mono font-extrabold px-3 py-1 rounded-full bg-[#D4AF37]/20 text-[#E5C158] border border-[#D4AF37]/40 uppercase tracking-widest inline-block">
-              RESTRICTED MEMBER DIRECTORY
-            </span>
-            <h2 className="text-2xl font-black text-white">Direktori Anggota Terkunci</h2>
-            <p className="text-xs text-slate-400 leading-relaxed">
-              Halaman direktori anggota resmi NTCI ini hanya dapat dibuka oleh Anggota Terverifikasi yang telah login ke portal.
-            </p>
-          </div>
-
-          <div className="space-y-3 pt-2">
-            <button
-              onClick={() => setShowLoginModal(true)}
-              className="w-full py-3.5 rounded-xl bg-gradient-to-r from-[#F0C05A] via-[#D4AF37] to-[#C5A059] text-[#171210] font-extrabold text-xs shadow-xl hover:opacity-95 flex items-center justify-center space-x-2 cursor-pointer"
-            >
-              <LogIn className="w-4 h-4" />
-              <span>Masuk Anggota (Login)</span>
-            </button>
-
-            <Link
-              href="/registrasi"
-              className="w-full py-3 rounded-xl bg-[#0B0E14] text-slate-300 hover:text-white border border-[#222C3D] text-xs font-bold flex items-center justify-center space-x-2 block"
-            >
-              <UserCheck className="w-4 h-4 text-[#D4AF37]" />
-              <span>Daftar Anggota Baru</span>
-            </Link>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   // Extract unique chapters from members
   const uniqueChapters = useMemo(() => {
     const map = new Map<string, string>();
@@ -232,7 +191,8 @@ export default function MemberDirectory({ members }: MemberDirectoryProps) {
                       <MemberCard
                         key={m.id}
                         member={m}
-                        onShowEkta={() => setSelectedEktaMember(m)}
+                        isMemberLoggedIn={isMemberLoggedIn}
+                        onShowEkta={() => (isMemberLoggedIn ? setSelectedEktaMember(m) : setShowLoginModal(true))}
                       />
                     ))}
                   </div>
@@ -252,7 +212,8 @@ export default function MemberDirectory({ members }: MemberDirectoryProps) {
                 <MemberCard
                   key={m.id}
                   member={m}
-                  onShowEkta={() => setSelectedEktaMember(m)}
+                  isMemberLoggedIn={isMemberLoggedIn}
+                  onShowEkta={() => (isMemberLoggedIn ? setSelectedEktaMember(m) : setShowLoginModal(true))}
                 />
               ))
             ) : (
@@ -275,7 +236,7 @@ export default function MemberDirectory({ members }: MemberDirectoryProps) {
 }
 
 {/* Sub-component: Member Card */}
-function MemberCard({ member, onShowEkta }: { member: MemberData; onShowEkta: () => void }) {
+function MemberCard({ member, onShowEkta, isMemberLoggedIn }: { member: MemberData; onShowEkta: () => void; isMemberLoggedIn: boolean }) {
   return (
     <div className="relative p-6 rounded-3xl bg-[#171210] border border-[#332722] hover:border-[#D4AF37]/50 transition-all shadow-xl space-y-4 flex flex-col justify-between group">
       <div className="flex items-start space-x-4">
@@ -327,7 +288,14 @@ function MemberCard({ member, onShowEkta }: { member: MemberData; onShowEkta: ()
         </div>
         <div className="flex justify-between text-slate-400">
           <span>Plat Nomor:</span>
-          <span className="font-mono text-[#E5C158] font-bold">{member.motorPlate}</span>
+          {isMemberLoggedIn ? (
+            <span className="font-mono text-[#E5C158] font-bold">{member.motorPlate}</span>
+          ) : (
+            <span className="font-mono text-slate-400 font-bold flex items-center space-x-1" title="Login anggota untuk melihat plat nomor">
+              <span>{member.motorPlate ? `${member.motorPlate.substring(0, 2)} **** ***` : 'B **** ***'}</span>
+              <Lock className="w-3 h-3 text-[#D4AF37]" />
+            </span>
+          )}
         </div>
       </div>
 
@@ -343,7 +311,7 @@ function MemberCard({ member, onShowEkta }: { member: MemberData; onShowEkta: ()
 
         <button
           onClick={onShowEkta}
-          className="w-full flex items-center justify-center space-x-1.5 py-2 rounded-xl text-xs font-bold text-[#E5C158] bg-[#D4AF37]/10 hover:bg-[#D4AF37]/20 border border-[#D4AF37]/30 transition-all"
+          className="w-full flex items-center justify-center space-x-1.5 py-2 rounded-xl text-xs font-bold text-[#E5C158] bg-[#D4AF37]/10 hover:bg-[#D4AF37]/20 border border-[#D4AF37]/30 transition-all cursor-pointer"
         >
           <Eye className="w-3.5 h-3.5" />
           <span>E-KTA</span>
