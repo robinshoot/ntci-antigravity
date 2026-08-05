@@ -2,10 +2,11 @@
 
 import React, { useState } from 'react';
 import { ChapterData, MemberData, EventData } from '@/lib/mockData';
-import { MapPin, Users, Phone, Calendar, Shield, ArrowLeft, CheckCircle, Clock, Search, Eye, User, Sparkles, Flag, ArrowRight } from 'lucide-react';
+import { MapPin, Users, Phone, Calendar, Shield, ArrowLeft, CheckCircle, Clock, Search, Eye, User, Sparkles, Flag, ArrowRight, Lock } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import EktaModal from './EktaModal';
+import { useAuth } from '@/context/AuthContext';
 
 interface ChapterDetailViewProps {
   chapter: ChapterData;
@@ -14,6 +15,7 @@ interface ChapterDetailViewProps {
 }
 
 export default function ChapterDetailView({ chapter, members, events }: ChapterDetailViewProps) {
+  const { isMemberLoggedIn, setShowLoginModal } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedEktaMember, setSelectedEktaMember] = useState<MemberData | null>(null);
 
@@ -265,7 +267,14 @@ export default function ChapterDetailView({ chapter, members, events }: ChapterD
                   </div>
                   <div className="flex justify-between text-slate-400">
                     <span>Plat Nomor:</span>
-                    <span className="font-mono text-[#E5C158] font-bold">{m.motorPlate}</span>
+                    {isMemberLoggedIn ? (
+                      <span className="font-mono text-[#E5C158] font-bold">{m.motorPlate}</span>
+                    ) : (
+                      <span className="font-mono text-slate-400 font-bold flex items-center space-x-1" title="Login anggota untuk melihat plat nomor">
+                        <span>{m.motorPlate ? `${m.motorPlate.substring(0, 2)} **** ***` : 'B **** ***'}</span>
+                        <Lock className="w-3 h-3 text-[#D4AF37]" />
+                      </span>
+                    )}
                   </div>
                 </div>
 
@@ -280,8 +289,8 @@ export default function ChapterDetailView({ chapter, members, events }: ChapterD
                   </Link>
 
                   <button
-                    onClick={() => setSelectedEktaMember(m)}
-                    className="w-full flex items-center justify-center space-x-1.5 py-2 rounded-xl text-xs font-bold text-[#E5C158] bg-[#D4AF37]/10 hover:bg-[#D4AF37]/20 border border-[#D4AF37]/30 transition-all"
+                    onClick={() => (isMemberLoggedIn ? setSelectedEktaMember(m) : setShowLoginModal(true))}
+                    className="w-full flex items-center justify-center space-x-1.5 py-2 rounded-xl text-xs font-bold text-[#E5C158] bg-[#D4AF37]/10 hover:bg-[#D4AF37]/20 border border-[#D4AF37]/30 transition-all cursor-pointer"
                   >
                     <Eye className="w-3.5 h-3.5" />
                     <span>E-KTA</span>
