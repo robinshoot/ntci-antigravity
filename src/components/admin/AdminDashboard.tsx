@@ -4,7 +4,7 @@ import { generateQrCodeSvg, extractNraFromQrData, playScanBeepSound } from '@/li
 import jsQR from 'jsqr';
 import React, { useState, useRef, useEffect } from 'react';
 import { MemberData, ChapterData, EventData, ArticleData, DocumentData, MerchandiseData, SponsorData, EmergencyContactData, ChapterOfficer } from '@/lib/mockData';
-import { Shield, Users, MapPin, Calendar, FileText, ShoppingBag, PhoneCall, Plus, Trash2, CheckCircle, Clock, AlertTriangle, Eye, Lock, Edit3, X, Sparkles, UserCheck, QrCode, Camera } from 'lucide-react';
+import { Shield, Users, MapPin, Calendar, FileText, ShoppingBag, PhoneCall, Plus, Trash2, CheckCircle, Clock, AlertTriangle, Eye, EyeOff, Lock, Edit3, X, Sparkles, UserCheck, QrCode, Camera, LogOut } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -38,6 +38,73 @@ export default function AdminDashboard({
   const [articles, setArticles] = useState<ArticleData[]>(initialArticles);
   const [merch, setMerch] = useState<MerchandiseData[]>(initialMerch);
   const [emergency, setEmergency] = useState<EmergencyContactData[]>(initialEmergency);
+
+  // Authentication & Security Access Control State
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [adminLoginEmail, setAdminLoginEmail] = useState('admin@ntci.or.id');
+  const [adminLoginPassword, setAdminLoginPassword] = useState('');
+  const [adminLoginError, setAdminLoginError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [currentAdmin, setCurrentAdmin] = useState<{ name: string; role: string; email: string } | null>(null);
+
+  // Restore authenticated session from localStorage
+  useEffect(() => {
+    const savedSession = localStorage.getItem('ntci_admin_session');
+    if (savedSession) {
+      try {
+        const parsed = JSON.parse(savedSession);
+        if (parsed && parsed.authenticated) {
+          setIsAuthenticated(true);
+          setCurrentAdmin(parsed.adminInfo || { name: 'Bambang "Turbo" Wijaya', role: 'SUPER_ADMIN', email: 'admin@ntci.or.id' });
+        }
+      } catch (e) {
+        localStorage.removeItem('ntci_admin_session');
+      }
+    }
+  }, []);
+
+  const handleAdminLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    setAdminLoginError('');
+
+    const emailLower = adminLoginEmail.trim().toLowerCase();
+    const pass = adminLoginPassword.trim();
+
+    // Check against verified admin members or default admin credentials
+    const matchedMember = members.find(
+      (m) =>
+        m.isVerified &&
+        (m.role === 'SUPER_ADMIN' || m.role === 'CHAPTER_ADMIN') &&
+        (m.email.toLowerCase() === emailLower || m.nra?.toLowerCase() === emailLower)
+    );
+
+    const isDefaultAdmin =
+      (emailLower === 'admin@ntci.or.id' || emailLower === 'nt-001' || emailLower === 'admin') &&
+      (pass === 'admin123' || pass === 'admin');
+
+    const isMemberAdmin = matchedMember && (pass === 'admin123' || pass === 'admin' || pass === 'ntci2026');
+
+    if (isDefaultAdmin || isMemberAdmin) {
+      const adminInfo = matchedMember
+        ? { name: matchedMember.fullName, role: matchedMember.role, email: matchedMember.email }
+        : { name: 'Bambang "Turbo" Wijaya', role: 'SUPER_ADMIN (Ketua Umum)', email: 'admin@ntci.or.id' };
+
+      setIsAuthenticated(true);
+      setCurrentAdmin(adminInfo);
+      localStorage.setItem(
+        'ntci_admin_session',
+        JSON.stringify({ authenticated: true, adminInfo, loginTime: Date.now() })
+      );
+    } else {
+      setAdminLoginError('Email/NRA atau Password salah. Silakan periksa kembali!');
+    }
+  };
+
+  const handleAdminLogout = () => {
+    setIsAuthenticated(false);
+    setCurrentAdmin(null);
+    localStorage.removeItem('ntci_admin_session');
+  };
 
   // Search Filter State
   const [searchQuery, setSearchQuery] = useState('');
@@ -659,6 +726,106 @@ export default function AdminDashboard({
     }
   };
 
+  // If not authenticated, render Security Login Screen Gateway
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-[#0D0B0A] text-slate-200 flex flex-col justify-center items-center p-4 relative overflow-hidden pt-20">
+        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-[#D4AF37]/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-10 right-10 w-80 h-80 bg-[#C5A059]/10 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="w-full max-w-md bg-[#171210] border-2 border-[#D4AF37]/40 rounded-3xl p-8 shadow-2xl space-y-6 relative z-10 animate-fadeIn">
+          <div className="text-center space-y-3">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#F0C05A] via-[#D4AF37] to-[#8C6B1C] p-0.5 shadow-xl mx-auto flex items-center justify-center">
+              <div className="w-full h-full bg-[#171210] rounded-[14px] flex items-center justify-center text-[#D4AF37]">
+                <Lock className="w-8 h-8" />
+              </div>
+            </div>
+
+            <span className="text-[10px] font-mono font-extrabold px-3 py-1 rounded-full bg-[#D4AF37]/20 text-[#E5C158] border border-[#D4AF37]/40 uppercase tracking-widest inline-block">
+              AUTHENTICATION REQUIRED
+            </span>
+            <h2 className="text-2xl font-black text-white tracking-tight">Login Portal Admin CMS</h2>
+            <p className="text-xs text-[#A39690]">
+              Masukkan kredensial administrator untuk mengelola data anggota, e-KTA, presensi, dan kegiatan NTCI.
+            </p>
+          </div>
+
+          {adminLoginError && (
+            <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs font-bold flex items-center space-x-2 animate-fadeIn">
+              <AlertTriangle className="w-4 h-4 shrink-0 text-rose-400" />
+              <span>{adminLoginError}</span>
+            </div>
+          )}
+
+          <form onSubmit={handleAdminLogin} className="space-y-4">
+            <div className="space-y-1">
+              <label className="text-[11px] font-extrabold text-[#E5C158] uppercase tracking-wider block">
+                Email / NRA Admin
+              </label>
+              <input
+                type="text"
+                required
+                value={adminLoginEmail}
+                onChange={(e) => setAdminLoginEmail(e.target.value)}
+                placeholder="Contoh: admin@ntci.or.id atau NT-001"
+                className="w-full p-3.5 rounded-xl bg-[#0D0B0A] border border-[#332722] text-white text-xs font-mono font-bold focus:outline-none focus:border-[#E5C158] transition-all"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-[11px] font-extrabold text-[#E5C158] uppercase tracking-wider block">
+                Password Akses
+              </label>
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  value={adminLoginPassword}
+                  onChange={(e) => setAdminLoginPassword(e.target.value)}
+                  placeholder="Masukkan password admin..."
+                  className="w-full p-3.5 pr-10 rounded-xl bg-[#0D0B0A] border border-[#332722] text-white text-xs font-mono font-bold focus:outline-none focus:border-[#E5C158] transition-all"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white text-xs font-bold"
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              className="w-full py-3.5 rounded-xl bg-gradient-to-r from-[#F0C05A] via-[#D4AF37] to-[#C5A059] text-[#171210] font-extrabold text-sm shadow-xl hover:opacity-95 transition-all flex items-center justify-center space-x-2"
+            >
+              <Lock className="w-4 h-4" />
+              <span>Masuk Portal Admin CMS</span>
+            </button>
+          </form>
+
+          {/* Demo Credential Card Helper */}
+          <div className="p-3.5 rounded-2xl bg-[#0D0B0A] border border-[#332722] text-center space-y-1">
+            <span className="text-[10px] text-[#D4AF37] font-bold block flex items-center justify-center space-x-1">
+              <Sparkles className="w-3.5 h-3.5 text-[#D4AF37]" />
+              <span>Kredensial Default Admin CMS:</span>
+            </span>
+            <p className="text-[11px] text-slate-300 font-mono font-semibold">
+              User: <span className="text-[#E5C158]">admin@ntci.or.id</span> (atau <span className="text-[#E5C158]">NT-001</span>)<br />
+              Password: <span className="text-[#E5C158]">admin123</span> (atau <span className="text-[#E5C158]">admin</span>)
+            </p>
+          </div>
+
+          <div className="text-center pt-2">
+            <Link href="/" className="text-xs text-slate-400 hover:text-white underline font-semibold">
+              ← Kembali ke Portal Utama NTCI
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#0D0B0A] text-slate-200 flex flex-col pt-24 pb-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full space-y-8">
@@ -685,12 +852,30 @@ export default function AdminDashboard({
           </div>
 
           <div className="flex items-center space-x-3">
+            <div className="text-right hidden sm:block">
+              <span className="text-[9px] text-[#A39690] uppercase block font-bold tracking-wider">
+                Admin Terautentikasi
+              </span>
+              <span className="text-xs font-black text-[#E5C158]">
+                {currentAdmin?.name || 'Bambang "Turbo" Wijaya'}
+              </span>
+            </div>
+
             <Link
               href="/"
-              className="px-4 py-2 rounded-xl text-xs font-bold text-slate-300 bg-[#0D0B0A] hover:text-white border border-[#332722]"
+              className="px-3.5 py-2 rounded-xl text-xs font-bold text-slate-300 bg-[#0D0B0A] hover:text-white border border-[#332722]"
             >
-              Lihat Portal Publik
+              Portal Publik
             </Link>
+
+            <button
+              type="button"
+              onClick={handleAdminLogout}
+              className="px-3.5 py-2 rounded-xl text-xs font-bold text-rose-400 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 flex items-center space-x-1.5 transition-all"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              <span>Keluar</span>
+            </button>
           </div>
         </div>
 
