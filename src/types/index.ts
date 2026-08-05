@@ -25,6 +25,8 @@ export interface ChapterData {
   memberCount: number;
   logoUrl?: string;
   officers?: ChapterOfficer[];
+  createdBy?: string;
+  updatedBy?: string;
 }
 
 export interface MemberData {
@@ -48,6 +50,8 @@ export interface MemberData {
   joinedDate: string;
   points?: number;
   badges?: string[];
+  createdBy?: string;
+  updatedBy?: string;
 }
 
 export interface EventData {
@@ -64,6 +68,8 @@ export interface EventData {
   chapterSlug?: string;
   bannerUrl: string;
   attendingCount: number;
+  createdBy?: string;
+  updatedBy?: string;
 }
 
 export interface ArticleData {
@@ -78,6 +84,8 @@ export interface ArticleData {
   coverImage: string;
   createdAt: string;
   readTime: string;
+  createdBy?: string;
+  updatedBy?: string;
 }
 
 export interface DocumentData {
@@ -88,6 +96,8 @@ export interface DocumentData {
   fileUrl: string;
   fileSize: string;
   updatedAt: string;
+  createdBy?: string;
+  updatedBy?: string;
 }
 
 export interface MerchandiseData {
@@ -99,6 +109,8 @@ export interface MerchandiseData {
   imageUrl: string;
   buyUrl: string;
   isAvailable: boolean;
+  createdBy?: string;
+  updatedBy?: string;
 }
 
 export interface SponsorData {
@@ -108,6 +120,8 @@ export interface SponsorData {
   discountDetail: string;
   logoUrl: string;
   websiteUrl: string;
+  createdBy?: string;
+  updatedBy?: string;
 }
 
 export interface EmergencyContactData {
@@ -116,6 +130,8 @@ export interface EmergencyContactData {
   contactPerson: string;
   roleOrLocation: string;
   phone: string;
+  createdBy?: string;
+  updatedBy?: string;
 }
 
 export const CENTRAL_OFFICERS: ChapterOfficer[] = [

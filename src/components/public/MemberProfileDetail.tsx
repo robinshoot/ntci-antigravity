@@ -2,17 +2,60 @@
 
 import React, { useState } from 'react';
 import { MemberData } from '@/lib/mockData';
-import { Shield, CheckCircle, MapPin, Calendar, Phone, Mail, Award, ArrowLeft, Printer, Sparkles, UserCheck } from 'lucide-react';
+import { Shield, CheckCircle, MapPin, Calendar, Phone, Mail, Award, ArrowLeft, Printer, Sparkles, UserCheck, Lock, LogIn } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import EktaModal from './EktaModal';
+import { useAuth } from '@/context/AuthContext';
 
 interface MemberProfileDetailProps {
   member: MemberData;
 }
 
 export default function MemberProfileDetail({ member }: MemberProfileDetailProps) {
+  const { isMemberLoggedIn, setShowLoginModal } = useAuth();
   const [showEktaModal, setShowEktaModal] = useState(false);
+
+  // If user is not logged in as a verified member, block profile detail view
+  if (!isMemberLoggedIn) {
+    return (
+      <div className="pt-28 pb-20 bg-[#080B10] min-h-screen text-slate-200 flex flex-col items-center justify-center p-4">
+        <div className="max-w-md w-full bg-[#131924] border-2 border-[#D4AF37]/40 rounded-3xl p-8 text-center space-y-6 shadow-2xl relative overflow-hidden">
+          <div className="w-16 h-16 rounded-2xl bg-[#D4AF37]/20 border border-[#D4AF37]/50 flex items-center justify-center mx-auto text-[#E5C158] shadow-xl">
+            <Lock className="w-8 h-8" />
+          </div>
+
+          <div className="space-y-2">
+            <span className="text-[10px] font-mono font-extrabold px-3 py-1 rounded-full bg-[#D4AF37]/20 text-[#E5C158] border border-[#D4AF37]/40 uppercase tracking-widest inline-block">
+              RESTRICTED MEMBER PROFILE
+            </span>
+            <h2 className="text-2xl font-black text-white">Profil Anggota Terkunci</h2>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              Profil lengkap rider & e-KTA anggota NTCI ini hanya dapat diakses oleh Anggota Terverifikasi yang telah login.
+            </p>
+          </div>
+
+          <div className="space-y-3 pt-2">
+            <button
+              onClick={() => setShowLoginModal(true)}
+              className="w-full py-3.5 rounded-xl bg-gradient-to-r from-[#F0C05A] via-[#D4AF37] to-[#C5A059] text-[#171210] font-extrabold text-xs shadow-xl hover:opacity-95 flex items-center justify-center space-x-2 cursor-pointer"
+            >
+              <LogIn className="w-4 h-4" />
+              <span>Masuk Anggota (Login)</span>
+            </button>
+
+            <Link
+              href="/registrasi"
+              className="w-full py-3 rounded-xl bg-[#0B0E14] text-slate-300 hover:text-white border border-[#222C3D] text-xs font-bold flex items-center justify-center space-x-2 block"
+            >
+              <UserCheck className="w-4 h-4 text-[#D4AF37]" />
+              <span>Daftar Anggota Baru</span>
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="pt-28 pb-20 bg-[#080B10] min-h-screen text-slate-200">

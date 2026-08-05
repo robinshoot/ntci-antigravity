@@ -373,11 +373,14 @@ export default function AdminDashboard({
     );
   };
 
+  const adminAuthorTag = currentAdmin ? `${currentAdmin.name} (${currentAdmin.role})` : 'Admin Pusat NTCI (SUPER_ADMIN)';
+
   const handleSaveEditMember = (e: React.FormEvent) => {
     e.preventDefault();
     if (!showEditMemberModal) return;
+    const updated = { ...showEditMemberModal, updatedBy: adminAuthorTag };
     setMembers((prev) =>
-      prev.map((m) => (m.id === showEditMemberModal.id ? showEditMemberModal : m))
+      prev.map((m) => (m.id === showEditMemberModal.id ? updated : m))
     );
     setShowEditMemberModal(null);
   };
@@ -385,8 +388,9 @@ export default function AdminDashboard({
   const handleSaveEditChapter = (e: React.FormEvent) => {
     e.preventDefault();
     if (!showEditChapterModal) return;
+    const updated = { ...showEditChapterModal, updatedBy: adminAuthorTag };
     setChapters((prev) =>
-      prev.map((c) => (c.id === showEditChapterModal.id ? showEditChapterModal : c))
+      prev.map((c) => (c.id === showEditChapterModal.id ? updated : c))
     );
     setShowEditChapterModal(null);
   };
@@ -471,6 +475,8 @@ export default function AdminDashboard({
       motorColor: 'Magma Black',
       avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80',
       joinedDate: 'Hari Ini',
+      createdBy: adminAuthorTag,
+      updatedBy: adminAuthorTag,
     };
     setMembers([newMem, ...members]);
     setNewMemberName('');
@@ -593,6 +599,8 @@ export default function AdminDashboard({
       status: newChapterStatus,
       memberCount: officersList.length > 0 ? officersList.length : 1,
       officers: officersList,
+      createdBy: adminAuthorTag,
+      updatedBy: adminAuthorTag,
     };
 
     setChapters([...chapters, newCh]);
@@ -636,6 +644,8 @@ export default function AdminDashboard({
       chapterSlug: chSlug,
       bannerUrl: 'https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&w=800&q=80',
       attendingCount: 12,
+      createdBy: adminAuthorTag,
+      updatedBy: adminAuthorTag,
     };
     setEvents([newEv, ...events]);
     setNewEventTitle('');
