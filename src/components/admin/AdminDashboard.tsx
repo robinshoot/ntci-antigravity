@@ -7,6 +7,7 @@ import { MemberData, ChapterData, EventData, ArticleData, DocumentData, Merchand
 import { Shield, Users, MapPin, Calendar, FileText, ShoppingBag, PhoneCall, Plus, Trash2, CheckCircle, Clock, AlertTriangle, Eye, EyeOff, Lock, Edit3, X, Sparkles, UserCheck, QrCode, Camera, LogOut } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useSession, signIn, signOut } from 'next-auth/react';
 
 interface AdminDashboardProps {
   initialMembers: MemberData[];
@@ -29,6 +30,7 @@ export default function AdminDashboard({
   initialSponsors,
   initialEmergency,
 }: AdminDashboardProps) {
+  const { data: session } = useSession();
   const [activeTab, setActiveTab] = useState<'MEMBERS' | 'CHAPTERS' | 'EVENTS' | 'ARTICLES' | 'MERCH' | 'EMERGENCY'>('MEMBERS');
 
   // State Management for Local CMS Actions
@@ -47,30 +49,71 @@ export default function AdminDashboard({
   const [showPassword, setShowPassword] = useState(false);
   const [currentAdmin, setCurrentAdmin] = useState<{ name: string; role: string; email: string } | null>(null);
 
-  // Restore authenticated session from localStorage
+  // Sync session & restore authenticated session from localStorage or NextAuth
   useEffect(() => {
-    const savedSession = localStorage.getItem('ntci_admin_session');
-    if (savedSession) {
-      try {
-        const parsed = JSON.parse(savedSession);
-        if (parsed && parsed.authenticated) {
-          setIsAuthenticated(true);
-          setCurrentAdmin(parsed.adminInfo || { name: 'Bambang "Turbo" Wijaya', role: 'SUPER_ADMIN', email: 'admin@ntci.or.id' });
+    if (session?.user && (session.user.role === 'SUPER_ADMIN' || session.user.role === 'CHAPTER_ADMIN')) {
+      setIsAuthenticated(true);
+      setCurrentAdmin({
+        name: session.user.name || 'Bambang "Turbo" Wijaya',
+        role: session.user.role || 'SUPER_ADMIN (Ketua Umum)',
+        email: session.user.email || 'admin@ntci.or.id',
+      });
+    } else {
+      const savedSession = localStorage.getItem('ntci_admin_session');
+      if (savedSession) {
+        try {
+          const parsed = JSON.parse(savedSession);
+          if (parsed && parsed.authenticated) {
+            setIsAuthenticated(true);
+            setCurrentAdmin(parsed.adminInfo || { name: 'Bambang "Turbo" Wijaya', role: 'SUPER_ADMIN', email: 'admin@ntci.or.id' });
+          } else {
+            setIsAuthenticated(false);
+          }
+        } catch (e) {
+          setIsAuthenticated(false);
         }
-      } catch (e) {
-        localStorage.removeItem('ntci_admin_session');
+      } else {
+        setIsAuthenticated(false);
       }
     }
-  }, []);
+  }, [session]);
 
-  const handleAdminLogin = (e: React.FormEvent) => {
+  const handleAdminLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setAdminLoginError('');
 
     const emailLower = adminLoginEmail.trim().toLowerCase();
     const pass = adminLoginPassword.trim();
 
-    // Check against verified admin members or default admin credentials
+    if (!pass) {
+      setAdminLoginError('Masukkan password admin!');
+      return;
+    }
+
+    try {
+      const res = await signIn('credentials', {
+        redirect: false,
+        identifier: emailLower,
+        password: pass,
+      });
+
+      if (res && !res.error) {
+        setIsAuthenticated(true);
+        setCurrentAdmin({
+          name: 'Bambang "Turbo" Wijaya',
+          role: 'SUPER_ADMIN (Ketua Umum)',
+          email: emailLower,
+        });
+        localStorage.setItem(
+          'ntci_admin_session',
+          JSON.stringify({ authenticated: true, adminInfo: { name: 'Bambang "Turbo" Wijaya', role: 'SUPER_ADMIN', email: emailLower }, loginTime: Date.now() })
+        );
+        return;
+      }
+    } catch (err) {
+      // Fallback local check
+    }
+
     const matchedMember = members.find(
       (m) =>
         m.isVerified &&
@@ -96,7 +139,7 @@ export default function AdminDashboard({
         JSON.stringify({ authenticated: true, adminInfo, loginTime: Date.now() })
       );
     } else {
-      setAdminLoginError('Email/NRA atau Password salah. Silakan periksa kembali!');
+      setAdminLoginError('Email/NRA atau Password Admin salah. Silakan periksa kembali!');
     }
   };
 
@@ -104,6 +147,7 @@ export default function AdminDashboard({
     setIsAuthenticated(false);
     setCurrentAdmin(null);
     localStorage.removeItem('ntci_admin_session');
+    signOut({ redirect: false });
   };
 
   // Search Filter State
