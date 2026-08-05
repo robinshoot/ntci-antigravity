@@ -23,11 +23,11 @@ export default function Footer() {
                 />
               </div>
               <div className="flex flex-col">
-                <span className="font-black text-white text-lg tracking-wider">
-                  NTCI INDONESIA
+                <span className="font-black text-white text-xl tracking-wider leading-tight">
+                  NTCI
                 </span>
-                <span className="text-[9px] font-extrabold text-[#D4AF37] uppercase tracking-widest">
-                  Tech MAX Ultimate Edition
+                <span className="text-[10px] font-semibold text-[#A39690] uppercase tracking-widest">
+                  Nmax Turbo Club Indonesia
                 </span>
               </div>
             </div>

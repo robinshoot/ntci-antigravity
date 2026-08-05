@@ -87,14 +87,9 @@ export default function Navbar() {
                 />
               </div>
               <div className="flex flex-col">
-                <div className="flex items-center space-x-1.5 whitespace-nowrap">
-                  <span className="font-black text-white text-sm sm:text-lg tracking-wider group-hover:text-[#D4AF37] transition-colors">
-                    NTCI INDONESIA
-                  </span>
-                  <span className="text-[8px] sm:text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-[#D4AF37]/20 text-[#E5C158] border border-[#D4AF37]/40 uppercase tracking-tighter shrink-0">
-                    TECH MAX
-                  </span>
-                </div>
+                <span className="font-black text-white text-base sm:text-xl tracking-wider group-hover:text-[#D4AF37] transition-colors leading-tight">
+                  NTCI
+                </span>
                 <span className="hidden sm:block text-[9px] sm:text-[10px] text-[#A39690] font-semibold tracking-widest uppercase whitespace-nowrap">
                   Nmax Turbo Club Indonesia
                 </span>
@@ -217,8 +212,8 @@ export default function Navbar() {
                   />
                 </div>
                 <div>
-                  <h4 className="font-extrabold text-white text-sm">NTCI INDONESIA</h4>
-                  <p className="text-[10px] text-[#A39690] uppercase font-mono font-semibold">Menu Navigasi Mobile</p>
+                  <h4 className="font-black text-white text-base leading-tight">NTCI</h4>
+                  <p className="text-[10px] text-[#A39690] uppercase font-mono font-semibold">Nmax Turbo Club Indonesia</p>
                 </div>
               </div>
               <button
