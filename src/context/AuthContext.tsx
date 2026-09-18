@@ -9,6 +9,7 @@ interface AuthContextType {
   isMemberLoggedIn: boolean;
   loginMember: (identifier: string, pass: string, membersList?: MemberData[]) => Promise<{ success: boolean; message: string }>;
   logoutMember: () => void;
+  updateProfile: (updatedData: Partial<MemberData>) => void;
   showLoginModal: boolean;
   setShowLoginModal: (show: boolean) => void;
 }
@@ -18,6 +19,7 @@ const AuthContext = createContext<AuthContextType>({
   isMemberLoggedIn: false,
   loginMember: async () => ({ success: false, message: '' }),
   logoutMember: () => {},
+  updateProfile: () => {},
   showLoginModal: false,
   setShowLoginModal: () => {},
 });
@@ -151,6 +153,17 @@ function AuthInnerProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem('ntci_member_session');
   };
 
+  const updateProfile = (updatedData: Partial<MemberData>) => {
+    setCurrentUser((prev) => {
+      if (!prev) return null;
+      const updated = { ...prev, ...updatedData };
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('ntci_member_session', JSON.stringify({ member: updated, loginTime: Date.now() }));
+      }
+      return updated;
+    });
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -158,6 +171,7 @@ function AuthInnerProvider({ children }: { children: React.ReactNode }) {
         isMemberLoggedIn: !!currentUser,
         loginMember,
         logoutMember,
+        updateProfile,
         showLoginModal,
         setShowLoginModal,
       }}

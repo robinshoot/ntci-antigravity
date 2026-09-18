@@ -2,19 +2,37 @@
 
 import React, { useState } from 'react';
 import { MemberData } from '@/lib/mockData';
-import { Shield, CheckCircle, MapPin, Calendar, Phone, Mail, Award, ArrowLeft, Printer, Sparkles, UserCheck, Lock, LogIn } from 'lucide-react';
+import { Shield, CheckCircle, MapPin, Calendar, Phone, Mail, Award, ArrowLeft, Printer, Sparkles, UserCheck, Lock, LogIn, Edit3, Camera } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import EktaModal from './EktaModal';
+import EditProfileModal from './EditProfileModal';
 import { useAuth } from '@/context/AuthContext';
 
 interface MemberProfileDetailProps {
   member: MemberData;
 }
 
-export default function MemberProfileDetail({ member }: MemberProfileDetailProps) {
-  const { isMemberLoggedIn, setShowLoginModal } = useAuth();
+export default function MemberProfileDetail({ member: initialMember }: MemberProfileDetailProps) {
+  const { currentUser, isMemberLoggedIn, setShowLoginModal, updateProfile } = useAuth();
+  const [member, setMember] = useState<MemberData>(initialMember);
   const [showEktaModal, setShowEktaModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+
+  // Check if the authenticated user is the owner of this profile or a super admin
+  const canEdit = Boolean(
+    isMemberLoggedIn &&
+    currentUser &&
+    (currentUser.id === member.id ||
+      (currentUser.nra && member.nra && currentUser.nra.toLowerCase() === member.nra.toLowerCase()) ||
+      (currentUser.email && member.email && currentUser.email.toLowerCase() === member.email.toLowerCase()) ||
+      currentUser.role === 'SUPER_ADMIN')
+  );
+
+  const handleProfileUpdated = (updated: MemberData) => {
+    setMember(updated);
+    updateProfile(updated);
+  };
 
   return (
     <div className="pt-28 pb-20 bg-[#080B10] min-h-screen text-slate-200">
@@ -36,8 +54,8 @@ export default function MemberProfileDetail({ member }: MemberProfileDetailProps
           <div className="absolute bottom-0 left-0 w-80 h-80 bg-[#FF2E55]/10 rounded-full blur-3xl pointer-events-none" />
 
           <div className="relative z-10 flex flex-col md:flex-row items-center md:items-start gap-8 text-center md:text-left">
-            {/* Avatar */}
-            <div className="relative w-36 h-36 rounded-3xl overflow-hidden border-4 border-[#00E5FF]/40 shadow-2xl shrink-0">
+            {/* Avatar with optional change button for profile owner */}
+            <div className="relative group w-36 h-36 rounded-3xl overflow-hidden border-4 border-[#00E5FF]/40 shadow-2xl shrink-0 bg-[#0B0E14]">
               <Image
                 src={member.avatarUrl}
                 alt={member.fullName}
@@ -45,6 +63,17 @@ export default function MemberProfileDetail({ member }: MemberProfileDetailProps
                 sizes="144px"
                 className="object-cover"
               />
+              {canEdit && (
+                <button
+                  type="button"
+                  onClick={() => setShowEditModal(true)}
+                  className="absolute inset-0 bg-black/65 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white space-y-1 cursor-pointer"
+                  title="Klik untuk ubah foto profil"
+                >
+                  <Camera className="w-6 h-6 text-[#00E5FF]" />
+                  <span className="text-[10px] font-bold">Ubah Foto</span>
+                </button>
+              )}
             </div>
 
             {/* Main Info */}
@@ -94,6 +123,18 @@ export default function MemberProfileDetail({ member }: MemberProfileDetailProps
 
               {/* Action Buttons */}
               <div className="pt-2 flex flex-wrap items-center justify-center md:justify-start gap-3">
+                {/* Self-service Edit Profile Button */}
+                {canEdit && (
+                  <button
+                    type="button"
+                    onClick={() => setShowEditModal(true)}
+                    className="flex items-center space-x-2 px-5 py-2.5 rounded-xl text-xs font-black text-[#171210] bg-gradient-to-r from-[#F0C05A] via-[#D4AF37] to-[#C5A059] hover:opacity-95 transition-all shadow-xl cursor-pointer"
+                  >
+                    <Edit3 className="w-4 h-4" />
+                    <span>Edit Profil Saya</span>
+                  </button>
+                )}
+
                 <button
                   onClick={() => (isMemberLoggedIn ? setShowEktaModal(true) : setShowLoginModal(true))}
                   className="flex items-center space-x-2 px-5 py-2.5 rounded-xl text-xs font-extrabold text-black bg-gradient-to-r from-[#00E5FF] to-[#3B82F6] hover:opacity-90 transition-all shadow-xl cursor-pointer"
@@ -234,10 +275,21 @@ export default function MemberProfileDetail({ member }: MemberProfileDetailProps
 
       </div>
 
+      {/* E-KTA Modal */}
       <EktaModal
         member={showEktaModal ? member : null}
         onClose={() => setShowEktaModal(false)}
       />
+
+      {/* Edit Profile Modal */}
+      {canEdit && (
+        <EditProfileModal
+          member={member}
+          isOpen={showEditModal}
+          onClose={() => setShowEditModal(false)}
+          onSuccess={handleProfileUpdated}
+        />
+      )}
     </div>
   );
 }

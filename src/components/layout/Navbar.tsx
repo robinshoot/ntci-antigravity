@@ -203,20 +203,33 @@ export default function Navbar() {
             <div className="hidden lg:flex items-center space-x-2.5 shrink-0">
               {isMemberLoggedIn && currentUser ? (
                 /* Authenticated Member Profile Badge */
-                <div className="flex items-center space-x-2 bg-[#171210] border border-[#D4AF37]/50 rounded-xl p-1 pr-3">
-                  <div className="relative w-8 h-8 rounded-lg overflow-hidden border border-[#D4AF37] shrink-0">
-                    <Image src={currentUser.avatarUrl} alt={currentUser.fullName} fill sizes="32px" className="object-cover" />
-                  </div>
-                  <div className="flex flex-col text-left">
-                    <span className="text-[10px] font-black text-[#E5C158] truncate max-w-[110px]">
-                      {currentUser.fullName.split(' ')[0]}
-                    </span>
-                    <span className="text-[8px] font-mono text-[#A39690]">{currentUser.nra}</span>
-                  </div>
+                <div className="flex items-center space-x-2 bg-[#171210] border border-[#D4AF37]/50 rounded-xl p-1 pr-2">
+                  <Link
+                    href={`/anggota/${currentUser.nra || 'NT-001'}`}
+                    className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
+                    title="Buka Profil Saya"
+                  >
+                    <div className="relative w-8 h-8 rounded-lg overflow-hidden border border-[#D4AF37] shrink-0">
+                      <Image src={currentUser.avatarUrl} alt={currentUser.fullName} fill sizes="32px" className="object-cover" />
+                    </div>
+                    <div className="flex flex-col text-left">
+                      <span className="text-[10px] font-black text-[#E5C158] truncate max-w-[100px]">
+                        {currentUser.fullName.split(' ')[0]}
+                      </span>
+                      <span className="text-[8px] font-mono text-[#A39690]">{currentUser.nra}</span>
+                    </div>
+                  </Link>
+                  <Link
+                    href={`/anggota/${currentUser.nra || 'NT-001'}`}
+                    className="px-2 py-1 rounded-lg bg-[#241D1A] hover:bg-[#332722] text-[#E5C158] border border-[#332722] text-[9px] font-bold transition-all"
+                    title="Lihat & Edit Profil Saya"
+                  >
+                    Profil
+                  </Link>
                   <button
                     type="button"
                     onClick={logoutMember}
-                    className="p-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 transition-all ml-1"
+                    className="p-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 transition-all ml-0.5 cursor-pointer"
                     title="Keluar / Logout Anggota"
                   >
                     <LogOut className="w-3.5 h-3.5" />
@@ -300,22 +313,37 @@ export default function Navbar() {
             {/* Mobile Auth Status Badge */}
             {isMemberLoggedIn && currentUser ? (
               <div className="p-3.5 rounded-2xl bg-[#171210] border border-[#D4AF37]/50 flex items-center justify-between shadow-lg">
-                <div className="flex items-center space-x-3">
-                  <div className="relative w-10 h-10 rounded-xl overflow-hidden border border-[#D4AF37]">
+                <Link
+                  href={`/anggota/${currentUser.nra || 'NT-001'}`}
+                  onClick={() => setIsOpen(false)}
+                  className="flex items-center space-x-3 flex-1"
+                >
+                  <div className="relative w-10 h-10 rounded-xl overflow-hidden border border-[#D4AF37] shrink-0">
                     <Image src={currentUser.avatarUrl} alt={currentUser.fullName} fill sizes="40px" className="object-cover" />
                   </div>
                   <div>
                     <span className="text-xs font-black text-white block">{currentUser.fullName}</span>
-                    <span className="text-[10px] text-[#E5C158] font-mono font-bold block">{currentUser.nra} • {currentUser.chapterName.replace('NTCI Chapter ', '')}</span>
+                    <span className="text-[10px] text-[#E5C158] font-mono font-bold block">
+                      {currentUser.nra} • {currentUser.chapterName?.replace('NTCI Chapter ', '') || 'Pusat'}
+                    </span>
                   </div>
+                </Link>
+                <div className="flex items-center space-x-2">
+                  <Link
+                    href={`/anggota/${currentUser.nra || 'NT-001'}`}
+                    onClick={() => setIsOpen(false)}
+                    className="px-2.5 py-1.5 rounded-xl bg-[#241D1A] text-[#E5C158] border border-[#332722] text-xs font-bold"
+                  >
+                    Profil
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={logoutMember}
+                    className="px-2.5 py-1.5 rounded-xl bg-rose-500/20 text-rose-400 border border-rose-500/40 text-xs font-bold cursor-pointer"
+                  >
+                    Keluar
+                  </button>
                 </div>
-                <button
-                  type="button"
-                  onClick={logoutMember}
-                  className="px-3 py-1.5 rounded-xl bg-rose-500/20 text-rose-400 border border-rose-500/40 text-xs font-bold"
-                >
-                  Keluar
-                </button>
               </div>
             ) : (
               <button
