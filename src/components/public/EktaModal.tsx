@@ -50,12 +50,8 @@ export default function EktaModal({ member, onClose }: EktaModalProps) {
             {/* Card Header */}
             <div className="relative z-10 flex items-center justify-between">
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#F0C05A] via-[#D4AF37] to-[#8C6B1C] p-0.5 shadow-lg">
-                  <div className="w-full h-full bg-[#171210] rounded-[9px] flex items-center justify-center">
-                    <span className="font-black text-transparent bg-clip-text bg-gradient-to-r from-[#F0C05A] to-[#E2E8F0] text-sm">
-                      NTCI
-                    </span>
-                  </div>
+                <div className="relative w-10 h-10 shrink-0 filter drop-shadow-[0_0_8px_rgba(212,175,55,0.5)]">
+                  <Image src="/logo.png" alt="NTCI Logo" width={40} height={40} className="object-contain w-full h-full" />
                 </div>
                 <div>
                   <h4 className="font-extrabold text-white text-sm tracking-wider uppercase">
