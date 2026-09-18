@@ -1087,7 +1087,11 @@ export default function AdminDashboard({
                           </div>
                         </td>
                         <td className="p-4 font-semibold text-slate-200">
-                          {m.chapterName && m.chapterName !== 'Belum Ditentukan' ? m.chapterName : <span className="text-amber-400 font-bold">Belum Ada Chapter</span>}
+                          {m.isVerified && m.chapterName && m.chapterName !== 'Belum Ditentukan' ? (
+                            m.chapterName
+                          ) : (
+                            <span className="text-slate-600 font-normal">-</span>
+                          )}
                         </td>
                         <td className="p-4">
                           <span className="text-white block font-medium">{m.motorModel}</span>
@@ -2214,11 +2218,12 @@ export default function AdminDashboard({
                     setShowEditMemberModal({
                       ...showEditMemberModal,
                       chapterName: e.target.value,
-                      chapterSlug: sel ? sel.slug : 'pusat',
+                      chapterSlug: sel ? sel.slug : '',
                     });
                   }}
                   className="w-full p-2.5 rounded-xl bg-[#0D0B0A] border border-[#332722] text-white font-bold"
                 >
+                  <option value="">-- Belum Ditentukan --</option>
                   {chapters.map((ch) => (
                     <option key={ch.id} value={ch.name}>
                       {ch.name}
